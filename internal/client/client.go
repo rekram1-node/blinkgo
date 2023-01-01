@@ -21,8 +21,7 @@ func Default() *resty.Client {
 }
 
 func New(token string) *resty.Client {
-	c := resty.New().
-		SetHeader("Content-Type", "application/json").
+	c := Default().
 		SetHeader("token-auth", token)
 
 	return c

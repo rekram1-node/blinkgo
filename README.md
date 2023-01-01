@@ -1,5 +1,15 @@
 # blinkgo
 
+
+██████╗░██╗░░░░░██╗███╗░░██╗██╗░░██╗░██████╗░░█████╗░
+██╔══██╗██║░░░░░██║████╗░██║██║░██╔╝██╔════╝░██╔══██╗
+██████╦╝██║░░░░░██║██╔██╗██║█████═╝░██║░░██╗░██║░░██║
+██╔══██╗██║░░░░░██║██║╚████║██╔═██╗░██║░░╚██╗██║░░██║
+██████╦╝███████╗██║██║░╚███║██║░╚██╗╚██████╔╝╚█████╔╝
+╚═════╝░╚══════╝╚═╝╚═╝░░╚══╝╚═╝░░╚═╝░╚═════╝░░╚════╝░
+
+CURRENTLY INCOMPLETE, WILL BE READY FOR USAGE IN A COUPLE DAYS
+
 Simple library for interacting with blink cameras, mainly: authentication, listing devices/networks/clips, and downloading clips from local storage
 
 This library was made for my purposes but if you would like to see more features open an issue and I will get to it
