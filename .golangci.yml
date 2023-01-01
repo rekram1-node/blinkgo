@@ -1,0 +1,50 @@
+run:
+  go: 1.19
+  concurrency: 4
+  timeout: 5m
+  modules-download-mode: readonly
+  build-tags:
+    - codeanalysis
+
+linters:
+  enable:
+  - bidichk
+  - dogsled
+  - errorlint
+  - exhaustive
+  - forbidigo
+  - gocritic
+  - gocyclo
+  - gofmt
+  - goimports
+  - gomoddirectives
+  - gosec
+  - ifshort
+  - ireturn
+  - makezero
+  - misspell
+  - nakedret
+  - nilnil
+  - nolintlint
+  - promlinter
+  - predeclared
+  - stylecheck
+  # - tagliatelle
+  - testpackage
+  - thelper
+  - tenv
+  - unused
+  - whitespace
+  disable:
+  - deadcode
+  - errcheck
+  - godot
+  fast: false
+
+  gosec:
+    includes:
+      - G401
+      - G306
+      - G101
+    excludes:
+      - G204

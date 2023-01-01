@@ -1,0 +1,20 @@
+# macOS artifacts
+.DS_Store
+
+# task artifacts
+.task
+
+# environment config
+.env
+
+# goreleaser artifacts
+dist
+
+# vscode artifacts
+.vscode
+
+# used for testing, not necessary for library
+main.go
+
+# binary
+blinkgo

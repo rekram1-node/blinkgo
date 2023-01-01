@@ -1,0 +1,54 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  NAME: 'blinkgo'
+
+tasks:
+  clean:
+    cmds:
+      - go clean
+
+  test:
+    desc: "runs unit tests"
+    cmds:
+      - go test -v
+    sources:
+      - ./**/*.go
+
+  build:
+    cmds:
+      - go build -trimpath -ldflags "{{.BUILD_FLAGS}}" -o {{.NAME}}{{exeExt}} {{.CLI_ARGS}}
+    sources:
+      - ./**/*.go
+    generates:
+      - '{{.NAME}}{{exeExt}}'
+    method: checksum
+    env:
+      CGO_ENABLED: 0
+      GOOS: '{{default "" .BUILD_OS}}'
+      GOARCH: '{{default "" .BUILD_ARCH}}'
+    vars:
+      BUILD_FLAGS: '{{default "" .BUILD_FLAGS}}'
+
+  run:
+    deps: [ build ]
+    sources:
+      - ./**/*
+      - ./*
+    cmds:
+      - ./{{.NAME}}{{exeExt}} {{.CLI_ARGS}}
+  
+  format:
+    cmds:
+      - gofmt -s -w .
+    sources:
+      - ./**/*.go
+
+  lint:
+    cmds:
+      - cmd: golangci-lint run -v -c ./.golangci.yml
+        ignore_error: true
+    sources:
+      - ./**/*.go
