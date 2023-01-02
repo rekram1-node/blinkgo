@@ -14,9 +14,9 @@ snapshot:
   name_template: "{{ .Tag }}"
 
 builds:
-  - id: blinkgo
-    main: .
-    binary: blinkgo
+  - skip: true
+  - id: "{{ .ProjectName }}"
+    binary: "{{ .ProjectName }}"
     env:
       - CGO_ENABLED=0
     targets:
