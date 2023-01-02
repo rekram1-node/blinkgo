@@ -112,21 +112,6 @@ func (account *Account) GetManifest() (*DeviceManifest, error) {
 	return manifest, nil
 }
 
-func (account *Account) GetSyncModules() error {
-	if account.SyncModules != nil {
-		return nil
-	}
-
-	manifest, err := account.GetManifest()
-
-	if err != nil {
-		return err
-	}
-
-	account.SyncModules = &manifest.SyncModules
-	return nil
-}
-
 type localStorageManifestIDResponse struct {
 	ID        int `json:"id"`
 	NetworkID int `json:"network_id"`

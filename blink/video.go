@@ -41,14 +41,14 @@ func (account *Account) GetVideoEvents(pages int) (*VideoEvents, error) {
 	return videoEvents, nil
 }
 
-func (account *Account) GetClipIDs(networkID, syncModuleID, requestID int) (*[]Clip, error) {
+func (account *Account) GetClipIDs(networkID, syncModuleID, requestID int) (*[]Clip, string, error) {
 	manifest, err := account.GetLocalStorageManifest(networkID, syncModuleID, requestID)
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return &manifest.Clips, nil
+	return &manifest.Clips, manifest.ManifestID, nil
 }
 
 func (account *Account) DownloadVideoByClipID(networkID, syncModuleID int, manifestID, clipID, fileName string) error {
