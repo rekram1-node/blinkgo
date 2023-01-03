@@ -13,9 +13,7 @@ tasks:
   test:
     desc: "runs unit tests"
     cmds:
-      - go test -v
-    sources:
-      - ./**/*.go
+      - go test -v ./...
 
   build:
     cmds:
