@@ -18,7 +18,7 @@ This library was made for my purposes but if you would like to see more features
 ## Getting Started
 
 ### Prerequisites
-- **[Go](https://go.dev/)
+- [Go](https://go.dev/)
 
 ### Getting blinkgo
 
@@ -58,7 +58,7 @@ func main() {
 	email := "example@example.com"
 	password := "PLEASE_DON'T_PLAINTEXT_REAL_PASSWORDS"
 
-    // returns account object with email, password, and a unique uuid
+    // returns account object with: email, password, uuid
 	account := blink.NewAccount(email, password)
 
 	// this returns a login response that you can use

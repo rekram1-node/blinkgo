@@ -30,7 +30,5 @@ jobs:
 
       - name: Build and Test
         run: |
-          go get .
-          go build -v ./...
           go test -v ./...
     
