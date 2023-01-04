@@ -132,7 +132,18 @@ videos := videoEvents.Media
 
 ### Download Videos Cloud
 ```go 
-UPDATE THIS, INCOMPLETE!!!!
+// retrieves media from: https://%s/api/v1/accounts/%i/media/changed?since=2019-04-19T23:11:20+0000&page=%i
+// the pages are the number of media pages you would like to download from
+
+numPages := 1
+
+// explicitly state the filepath you would like this to download to no need to add a / after the end
+downloadDir := "currentDir/newDir"
+err := DownloadVideosByPages(numPages, downloadDir)
+
+if err != nil {
+    log.Fatal(err)
+}
 ```
 
 ## Videos Local Storage

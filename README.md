@@ -8,6 +8,8 @@ Simple library for interacting with blink cameras, mainly: authentication, listi
 
 This library was made for my purposes but if you would like to see more features open an issue and I will get to it
 
+Credit to MattTW, who's findings: [BlinkMonitorProtocol](https://github.com/MattTW/BlinkMonitorProtocol) I used to create this implementation
+
 ## Features
 
 * authentication
