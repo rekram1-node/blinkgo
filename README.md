@@ -40,7 +40,7 @@ $ go get -u github.com/rekram1-node/blinkgo/blink
 
 ## Documentation
 
-Read the [documentation](https:/github.com/rekram1-node/blinkgo/docs/docs.md) for usage instructions
+Read the [documentation](https://github.com/rekram1-node/blinkgo/blob/main/docs/docs.md) for usage instructions
 
 
 ## Authentication
