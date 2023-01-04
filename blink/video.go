@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/rekram1-node/blinkgo/internal/client"
 )
 
@@ -41,45 +43,22 @@ func (account *Account) GetVideoEvents(pages int) (*VideoEvents, error) {
 	return videoEvents, nil
 }
 
-func (account *Account) GetClipIDs(networkID, syncModuleID, requestID int) (*[]Clip, error) {
+func (account *Account) GetClipIDs(networkID, syncModuleID, requestID int) (*[]Clip, string, error) {
 	manifest, err := account.GetLocalStorageManifest(networkID, syncModuleID, requestID)
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return &manifest.Clips, nil
+	return &manifest.Clips, manifest.ManifestID, nil
 }
 
 func (account *Account) DownloadVideoByClipID(networkID, syncModuleID int, manifestID, clipID, fileName string) error {
-	// this filename should have the ".mp4" in it
-	out, err := os.Create(fileName)
-
-	if err != nil {
-		return err
-	}
-
-	defer out.Close()
-
+	// filename should have the .mp4 included in it
 	c := client.New(account.AuthToken)
 	url := fmt.Sprintf("https://rest-%s.immedia-semi.com/api/v1/accounts/%d/networks/%d/sync_modules/%d/local_storage/manifest/%s/clip/request/%s", account.Tier, account.ID, networkID, syncModuleID, manifestID, clipID)
 
-	resp, err := c.R().
-		SetDoNotParseResponse(true). // necessary to read file
-		Get(url)
-
-	if err != nil {
-		return err
-	} else if !resp.IsSuccess() {
-		return fmt.Errorf("failed to get request download clip by ID: %s, status code: %d, response: %s", clipID, resp.StatusCode(), string(resp.Body()))
-	}
-
-	// copy mp4 video into file
-	if _, err = io.Copy(out, resp.RawBody()); err != nil {
-		return err
-	}
-
-	return resp.RawBody().Close()
+	return downloadVideo(url, fileName, c)
 }
 
 type UploadResponse struct {
@@ -106,11 +85,11 @@ func (account *Account) RequestUploadByClipID(networkID, syncModuleID int, manif
 	return uploadRes, nil
 }
 
-type Media struct {
+type AllMedia struct {
 	Limit        int64 `json:"limit"`
 	PurgeID      int64 `json:"purge_id"`
 	RefreshCount int64 `json:"refresh_count"`
-	Media        []struct {
+	MediaList    []struct {
 		AdditionalDevices []interface{} `json:"additional_devices"`
 		CreatedAt         string        `json:"created_at"`
 		Deleted           bool          `json:"deleted"`
@@ -159,11 +138,10 @@ type Video struct {
 	Viewed          string      `json:"viewed"`
 }
 
-func (account *Account) GetMedia(daysBack, pageNum int) (*Media, error) {
-	currTimeStamp := time.Now().UTC().Add(-time.Hour * 24 * time.Duration(daysBack)).Format("2006-01-02T15:04:05-0700")
-	media := &Media{}
+func (account *Account) GetMedia(sinceTimestamp string, pageNum int) (*AllMedia, error) {
+	media := &AllMedia{}
 	c := client.New(account.AuthToken)
-	url := fmt.Sprintf("/api/v1/accounts/%d/media/changed?since=%s&page=%d", account.ID, currTimeStamp, pageNum)
+	url := fmt.Sprintf("/api/v1/accounts/%d/media/changed?since=%s&page=%d", account.ID, sinceTimestamp, pageNum)
 
 	resp, err := c.R().
 		SetResult(media).
@@ -178,8 +156,8 @@ func (account *Account) GetMedia(daysBack, pageNum int) (*Media, error) {
 	return media, nil
 }
 
-func (account *Account) GetVideos(daysBack, pageNum int) (*[]Video, error) {
-	media, err := account.GetMedia(daysBack, pageNum)
+func (account *Account) GetVideos(sinceTimestamp string, pageNum int) (*[]Video, error) {
+	media, err := account.GetMedia(sinceTimestamp, pageNum)
 
 	if err != nil {
 		return nil, err
@@ -188,6 +166,51 @@ func (account *Account) GetVideos(daysBack, pageNum int) (*[]Video, error) {
 	return &media.Videos, nil
 }
 
-func (account *Account) DownloadVideosByPage() {
+func (account *Account) DownloadVideosByPages(pages int, downloadDir string) error {
+	timeStamp := "1970-01-01T00:00Z"
+	allMedia, err := account.GetMedia(timeStamp, pages)
 
+	if err != nil {
+		return err
+	}
+
+	for _, media := range allMedia.MediaList {
+		baseURL := strings.ReplaceAll(client.BaseURL, "prod", account.Tier)
+		mp4URL := baseURL + media.Media
+		fileName := downloadDir + "/" + media.DeviceName + "-" + media.NetworkName + "-" + media.CreatedAt + ".mp4"
+		c := client.New(account.AuthToken)
+
+		if err = downloadVideo(mp4URL, fileName, c); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func downloadVideo(url, file string, c *resty.Client) error {
+	out, err := os.Create(file)
+
+	if err != nil {
+		return err
+	}
+
+	defer out.Close()
+
+	resp, err := c.R().
+		SetDoNotParseResponse(true). // necessary to read file
+		Get(url)
+
+	if err != nil {
+		return err
+	} else if !resp.IsSuccess() {
+		return fmt.Errorf("failed to download clip from: %s, status code: %d, response: %s", url, resp.StatusCode(), string(resp.Body()))
+	}
+
+	// copy mp4 video into file
+	if _, err = io.Copy(out, resp.RawBody()); err != nil {
+		return err
+	}
+
+	return resp.RawBody().Close()
 }

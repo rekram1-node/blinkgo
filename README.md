@@ -1,33 +1,87 @@
 # blinkgo
 
-![blinkgo](docs/assets/blinkgo-logo.png)
+[![Go Report](https://goreportcard.com/badge/github.com/rekram1-node/blinkgo)](https://goreportcard.com/report/github.com/rekram1-node/blinkgo) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/rekram1-node/blinkgo/main/LICENSE) ![Build Status](https://github.com/rekram1-node/blinkgo/actions/workflows/main.yml/badge.svg)
 
-CURRENTLY INCOMPLETE, WILL BE READY FOR USAGE IN A COUPLE DAYS
+![blinkgo](docs/assets/blinkgo-logo.png)
 
 Simple library for interacting with blink cameras, mainly: authentication, listing devices/networks/clips, and downloading clips from local storage
 
 This library was made for my purposes but if you would like to see more features open an issue and I will get to it
 
-## Installation
+Credit to MattTW, who's findings: [BlinkMonitorProtocol](https://github.com/MattTW/BlinkMonitorProtocol) I used to create this implementation
 
-```shell
-go get -u github.com/rekram1-node/blinkgo/blink
+## Features
+
+* authentication
+* read networks, cameras, sync modules
+* list videos
+* download videos
+
+## Getting Started
+
+### Prerequisites
+- [Go](https://go.dev/)
+
+### Getting blinkgo
+
+With [Go module](https://github.com/golang/go/wiki/Modules) support, simply add the following import
+
+```go
+import "github.com/rekram1-node/blinkgo/blink"
 ```
 
-## Table of contents
+to your code, and then `go [build|run|test]` will automatically fetch the necessary dependencies.
 
-* [authentication](#auth)
-* [fetch user info](#user)
-* [list cameras](#camera)
-* [download videos](#videos)
-
-## Usage
+Otherwise, run the following to install the `blinkgo` library
 
 ```shell
-example
+$ go get -u github.com/rekram1-node/blinkgo/blink
 ```
 
-## Local Storage
+## Documentation
+
+Read the [documentation](https:/github.com/rekram1-node/blinkgo/docs/docs.md) for usage instructions
+
+
+## Authentication
+
+#### Simple login and 2FA verify pin
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/rekram1-node/blinkgo/blink"
+)
+
+func main() {
+	email := "example@example.com"
+	password := "PLEASE_DON'T_PLAINTEXT_REAL_PASSWORDS"
+
+    // returns account object with: email, password, uuid
+	account := blink.NewAccount(email, password)
+
+	// this returns a login response that you can use
+	// however, it is unneccessary for this example
+	if _, err := account.Login(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Print("Enter Pin: ")
+	var pin string
+	fmt.Scanln(&pin)
+
+	// this returns a verify pin response that you can use
+	// however, it is unneccessary for this example
+	if _, err = account.VerifyPin(pin); err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+## Local-Storage
 
 I did not discover this myself, this is from [blinkpy](https://github.com/fronzbot/blinkpy)
 

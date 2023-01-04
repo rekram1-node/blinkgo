@@ -86,7 +86,6 @@ func (account *Account) updateAccountInfo(resp *LoginResponse) {
 }
 
 func (account *Account) RefreshToken() (*LoginResponse, error) {
-	// this method is incomplete
 	// this just for readability of code I created RefreshToken
 	return account.Login()
 }
