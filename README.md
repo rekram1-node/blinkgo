@@ -1,6 +1,6 @@
 # blinkgo
 
-[![Go Report](https://goreportcard.com/badge/github.com/rekram1-node/blinkgo)](https://goreportcard.com/report/github.com/rekram1-node/blinkgo) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/rekram1-node/blinkgo/main/LICENSE) ![Build Status](https://github.com/rekram1-node/blinkgo/actions/workflows/main.yml/badge.svg)
+[![Go Report](https://goreportcard.com/badge/github.com/rekram1-node/blinkgo)](https://goreportcard.com/report/github.com/rekram1-node/blinkgo) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/rekram1-node/blinkgo/blob/main/LICENSE) ![Build Status](https://github.com/rekram1-node/blinkgo/actions/workflows/main.yml/badge.svg)
 
 ![blinkgo](docs/assets/blinkgo-logo.png)
 
