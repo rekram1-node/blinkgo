@@ -218,6 +218,6 @@ func downloadVideo(url, fileName string, c *resty.Client) error {
 func checkFileName(name *string) {
 	fileType := ".mp4"
 	if !strings.Contains(*name, fileType) {
-		*name = *name + fileType
+		*name += fileType
 	}
 }
