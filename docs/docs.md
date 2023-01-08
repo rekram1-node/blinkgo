@@ -146,7 +146,7 @@ if err != nil {
 }
 ```
 
-## Videos Local Storage
+## Videos Local From Storage
 I did not discover this myself, this is from [blinkpy](https://github.com/fronzbot/blinkpy)
 
 The steps for pulling videos from local storage
@@ -157,7 +157,7 @@ The steps for pulling videos from local storage
 
 Beware the upload/download sequence, there must be a waiting period between the two as the operation is not instantenous
 
-### List Videos Local Storage
+### List Videos From Local Storage
 ```go
 // this manifest will contain your networks and sync modules
 manifest, err := account.GetManifest()
@@ -183,10 +183,10 @@ if err != nil {
 }
 
 // extract clipID
-clipID := clips[0].ID
+clipID := (*clips)[0].ID
 ```
 
-### Download Videos Local Storage
+### Download Videos From Local Storage
 ```go
 // this assumes you already did the list videos from local storage operation and parsed out the clip id you want to download
 

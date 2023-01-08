@@ -11,11 +11,9 @@ type Account struct {
 
 	ID       int
 	ClientID int
-
-	SyncModules *[]SyncModule
-	Networks    *[]Network
 }
 
+// Creates an account object that can be used to login
 func NewAccount(email, pass string) *Account {
 	u := uuid.NewV4() // used for refresh authentication
 

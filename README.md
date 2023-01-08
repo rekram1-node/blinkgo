@@ -60,23 +60,31 @@ func main() {
 	email := "example@example.com"
 	password := "PLEASE_DON'T_PLAINTEXT_REAL_PASSWORDS"
 
-    // returns account object with: email, password, uuid
-	account := blink.NewAccount(email, password)
+	// returns account object with: email, password, uuid
+	// this is required for login and once authenticated, used
+	// for any blink operations
+	account := blink.NewAccount(user, pass)
 
-	// this returns a login response that you can use
-	// however, it is unneccessary for this example
-	if _, err := account.Login(); err != nil {
+	loginResp, err := account.Login()
+
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Print("Enter Pin: ")
-	var pin string
-	fmt.Scanln(&pin)
+	// if blink wants a 2FA verification you must use the 
+	// verify pin operation
+	// 2FA is not always required but typically required first
+	// time on new device
+	if loginResp.Account.AccountVerificationRequired {
+		fmt.Print("Enter Pin: ")
+		var pin string
+		fmt.Scanln(&pin)
 
-	// this returns a verify pin response that you can use
-	// however, it is unneccessary for this example
-	if _, err = account.VerifyPin(pin); err != nil {
-		log.Fatal(err)
+		// this returns a verify pin response that you can use
+		// however, it is unneccessary for this example
+		if _, err := account.VerifyPin(pin); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 ```

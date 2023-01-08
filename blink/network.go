@@ -26,7 +26,8 @@ type Network struct {
 	} `json:"cameras"`
 }
 
-func (account *Account) GetListOfNetworks() error {
+// Lists networks and cameras
+func (account *Account) GetListOfNetworks() (*[]Network, error) {
 	networkList := &NetworkList{}
 	c := client.New(account.AuthToken)
 	url := fmt.Sprintf("https://rest-%s.immedia-semi.com/api/v1/camera/usage", account.Tier)
@@ -36,12 +37,10 @@ func (account *Account) GetListOfNetworks() error {
 		Get(url)
 
 	if err != nil {
-		return err
+		return nil, err
 	} else if !resp.IsSuccess() {
-		return fmt.Errorf("failed to get list of networks, status code: %d, response: %s", resp.StatusCode(), resp.String())
+		return nil, fmt.Errorf("failed to get list of networks, status code: %d, response: %s", resp.StatusCode(), resp.String())
 	}
 
-	account.Networks = &networkList.Networks
-
-	return nil
+	return &networkList.Networks, nil
 }
