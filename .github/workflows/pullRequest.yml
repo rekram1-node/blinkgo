@@ -18,6 +18,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.50.1
+  
   test:
     runs-on: ubuntu-latest
     steps:
@@ -31,4 +32,16 @@ jobs:
       - name: Test
         run: |
           go test -v ./...
+  
+  deploy:experimental:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish Release
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: experimental
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
     
