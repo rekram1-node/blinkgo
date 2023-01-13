@@ -33,7 +33,7 @@ jobs:
         run: |
           go test -v ./...
   
-  deploy:experimental:
+  deploy-experimental:
     runs-on: ubuntu-latest
     steps:
       - name: Publish Release
