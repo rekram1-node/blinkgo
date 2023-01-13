@@ -33,6 +33,7 @@ type Camera struct {
 	Color                  string      `json:"color"`
 }
 
+// Lists Cameras from manifest
 func (account *Account) GetCameras() ([]Camera, error) {
 	manifest, err := account.GetManifest()
 
