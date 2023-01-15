@@ -43,46 +43,45 @@ func (account *Account) GetVideoEvents(pages int) (*VideoEvents, error) {
 	return videoEvents, nil
 }
 
-func (account *Account) GetClipIDs(networkID, syncModuleID, requestID int) (*[]Clip, string, error) {
-	manifest, err := account.GetLocalStorageManifest(networkID, syncModuleID, requestID)
+func (account *Account) DownloadVideoByClipID(networkID, syncModuleID int, manifestID, clipID, fileName string) error {
+	err := account.requestUpload(networkID, syncModuleID, manifestID, clipID)
 
 	if err != nil {
-		return nil, "", err
+		return err
 	}
 
-	return &manifest.Clips, manifest.ManifestID, nil
-}
-
-func (account *Account) DownloadVideoByClipID(networkID, syncModuleID int, manifestID, clipID, fileName string) error {
-	// filename should have the .mp4 included in it
+	checkFileName(&fileName)
 	c := client.New(account.AuthToken)
 	url := fmt.Sprintf("https://rest-%s.immedia-semi.com/api/v1/accounts/%d/networks/%d/sync_modules/%d/local_storage/manifest/%s/clip/request/%s", account.Tier, account.ID, networkID, syncModuleID, manifestID, clipID)
+
+	// wait for upload to complete
+	time.Sleep(5 * time.Second)
 
 	return downloadVideo(url, fileName, c)
 }
 
-type UploadResponse struct {
-	ID        int `json:"id"`
-	NetworkID int `json:"network_id"`
-}
+// type UploadResponse struct {
+// 	ID        int `json:"id"`
+// 	NetworkID int `json:"network_id"`
+// }
 
-// For local storage use
-func (account *Account) RequestUploadByClipID(networkID, syncModuleID int, manifestID, clipID string) (*UploadResponse, error) {
-	uploadRes := &UploadResponse{}
+// All Local Storage Clips must be uploaded before one can download
+func (account *Account) requestUpload(networkID, syncModuleID int, manifestID, clipID string) error {
+	// uploadRes := &UploadResponse{}
 	c := client.New(account.AuthToken)
 	url := fmt.Sprintf("https://rest-%s.immedia-semi.com/api/v1/accounts/%d/networks/%d/sync_modules/%d/local_storage/manifest/%s/clip/request/%s", account.Tier, account.ID, networkID, syncModuleID, manifestID, clipID)
 
 	resp, err := c.R().
-		SetResult(uploadRes).
+		// SetResult(uploadRes).
 		Post(url)
 
 	if err != nil {
-		return nil, err
+		return err
 	} else if !resp.IsSuccess() {
-		return nil, fmt.Errorf("failed to get request upload clip by ID: %s, status code: %d, response: %s", clipID, resp.StatusCode(), resp.String())
+		return fmt.Errorf("failed to get request upload clip by ID: %s, status code: %d, response: %s", clipID, resp.StatusCode(), resp.String())
 	}
 
-	return uploadRes, nil
+	return nil
 }
 
 type AllMedia struct {
@@ -166,7 +165,7 @@ func (account *Account) GetVideos(sinceTimestamp string, pageNum int) (*[]Video,
 	return &media.Videos, nil
 }
 
-func (account *Account) DownloadVideosByPages(pages int, downloadDir string) error {
+func (account *Account) DownloadVideosByPage(pages int, downloadDir string) error {
 	timeStamp := "1970-01-01T00:00Z"
 	allMedia, err := account.GetMedia(timeStamp, pages)
 
@@ -188,14 +187,15 @@ func (account *Account) DownloadVideosByPages(pages int, downloadDir string) err
 	return nil
 }
 
-func downloadVideo(url, file string, c *resty.Client) error {
-	out, err := os.Create(file)
+func downloadVideo(url, fileName string, c *resty.Client) error {
+	checkFileName(&fileName)
+	file, err := os.Create(fileName)
 
 	if err != nil {
 		return err
 	}
 
-	defer out.Close()
+	defer file.Close()
 
 	resp, err := c.R().
 		SetDoNotParseResponse(true). // necessary to read file
@@ -208,9 +208,16 @@ func downloadVideo(url, file string, c *resty.Client) error {
 	}
 
 	// copy mp4 video into file
-	if _, err = io.Copy(out, resp.RawBody()); err != nil {
+	if _, err = io.Copy(file, resp.RawBody()); err != nil {
 		return err
 	}
 
 	return resp.RawBody().Close()
+}
+
+func checkFileName(name *string) {
+	fileType := ".mp4"
+	if !strings.Contains(*name, fileType) {
+		*name += fileType
+	}
 }

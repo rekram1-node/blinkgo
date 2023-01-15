@@ -50,6 +50,7 @@ type LoginResponse struct {
 	AllowPinResendSeconds int  `json:"allow_pin_resend_seconds"`
 }
 
+// Completes a login request, might require a verify pin authentication as well
 func (account *Account) Login() (*LoginResponse, error) {
 	body := map[string]interface{}{
 		"email":     account.Email,
@@ -85,6 +86,7 @@ func (account *Account) updateAccountInfo(resp *LoginResponse) {
 	account.AuthToken = resp.Auth.Token
 }
 
+// Fetches new auth token
 func (account *Account) RefreshToken() (*LoginResponse, error) {
 	// this just for readability of code I created RefreshToken
 	return account.Login()
@@ -97,6 +99,7 @@ type VerifyResponse struct {
 	Code          int    `json:"code"`
 }
 
+// Verifies pin sent via email or sms
 func (account *Account) VerifyPin(pin string) (*VerifyResponse, error) {
 	verifyRes := &VerifyResponse{}
 	c := client.New(account.AuthToken)
@@ -119,11 +122,11 @@ func (account *Account) VerifyPin(pin string) (*VerifyResponse, error) {
 	return verifyRes, nil
 }
 
+// Logs user out
 func (account *Account) Logout() error {
 	c := client.New(account.AuthToken)
 	url := fmt.Sprintf("https://rest-%s.immedia-semi.com/api/v4/account/%d/client/%d/logout", account.Tier, account.ID, account.ClientID)
-	resp, err := c.R().
-		Post(url)
+	resp, err := c.R().Post(url)
 
 	if err != nil {
 		return err

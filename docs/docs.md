@@ -50,15 +50,27 @@ if err != nil {
 
 ### Verify Pin
 ```go
-fmt.Print("Enter Pin: ")
-var pin string
-fmt.Scanln(&pin)
+account := blink.NewAccount("someUsername", "somepassword")
+loginResp, err := account.Login()
 
-// this returns a verify pin response that you can use
-// however, it is unneccessary for this example
-verifyPinRes, err = account.VerifyPin(pin)
 if err != nil {
     log.Fatal(err)
+}
+
+// if blink wants a 2FA verification you must use the 
+// verify pin operation
+// 2FA is not always required but it is typically
+// required first time on new device
+if loginResp.Account.AccountVerificationRequired {
+    fmt.Print("Enter Pin: ")
+    var pin string
+    fmt.Scanln(&pin)
+
+    // this returns a verify pin response that you can use
+    // however, it is unneccessary for this example
+    if verifyPinRes, err := account.VerifyPin(pin); err != nil {
+        log.Fatal(err)
+    }
 }
 ```
 
@@ -146,7 +158,7 @@ if err != nil {
 }
 ```
 
-## Videos Local Storage
+## Videos Local From Storage
 I did not discover this myself, this is from [blinkpy](https://github.com/fronzbot/blinkpy)
 
 The steps for pulling videos from local storage
@@ -157,7 +169,7 @@ The steps for pulling videos from local storage
 
 Beware the upload/download sequence, there must be a waiting period between the two as the operation is not instantenous
 
-### List Videos Local Storage
+### Read Videos From Local Storage
 ```go
 // this manifest will contain your networks and sync modules
 manifest, err := account.GetManifest()
@@ -168,43 +180,40 @@ syncModule := manifest.SyncModules[0]
 syncModuleID := syncModule.ID
 networkID := syncModule.NetworkID
 
-manifestRequestID, err := account.GetLocalStorageManifestRequestID(networkID, syncModuleID)
-
+// returns local storage manifest object, which contains an array of clips
+localStorageManifest, err := account.GetLocalStorageManifest(networkID, syncModuleID)
 if err != nil {
     log.Fatal(err)
 }
 
-// returns list of clip objects and manifestID << not to be confused with manifestRequestID
-// list of clip objects is ordered from most recent to oldest, each clip will include timestamp, id, size, and camera name
-clips, manifestID, err := account.GetClipIDs(networkID, syncModuleID, manifestRequestID)
-
-if err != nil {
-    log.Fatal(err)
-}
-
-// extract clipID
-clipID := clips[0].ID
+// extract clipID from clip list
+clipID := localStorageManifest.Clips[0].ID
 ```
 
-### Download Videos Local Storage
+### Download Videos From Local Storage
 ```go
-// this assumes you already did the list videos from local storage operation and parsed out the clip id you want to download
+// this manifest will contain your networks and sync modules
+manifest, err := account.GetManifest()
 
-// request blink upload mp4 so we can download it
-// upload Response is not critical so it could be ignored
-uploadRes, err := account.RequestUploadByClipID(networkID, syncModuleID, manifestID, clipID)
+// parse out the sync module you want
+syncModule := manifest.SyncModules[0]
+// extract ids
+syncModuleID := syncModule.ID
+networkID := syncModule.NetworkID
 
+// returns local storage manifest object, which contains an array of clips
+localStorageManifest, err := account.GetLocalStorageManifest(networkID, syncModuleID)
 if err != nil {
     log.Fatal(err)
 }
+// iterate through the clips and download them
+for i := 0; i < len(localStorageManifest.Clips); i++ {
+    clipID := localStorageManifest.Clips[i].ID
+    fileName := "someVideoTitle-" + fmt.Sprint(i)
+    err = account.DownloadVideoByClipID(networkID, syncModuleID, localStorageManifest.ManifestID, clipID, fileName)
 
-// this could probably be cut down a little but we have to wait for upload to be completed
-time.Sleep(5 * time.Second)
-
-// you can finally download the video 
-fileName := "newVideo.mp4"
-err = account.DownloadVideoByClipID(networkID, syncModuleID, manifestID, clipID, fileName)
-if err != nil {
-    log.Fatal(err)
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 ```

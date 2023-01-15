@@ -92,6 +92,9 @@ type SyncModule struct {
 	Revision               string    `json:"revision"`
 }
 
+// Returns full manifest of all networks, syncmodules, cameras, devices
+// This is generally what you would use post login to then use information
+// To download or other activities
 func (account *Account) GetManifest() (*DeviceManifest, error) {
 	c := client.New(account.AuthToken)
 	url := fmt.Sprintf("https://rest-%s.immedia-semi.com/api/v3/accounts/%d/homescreen", account.Tier, account.ID)
@@ -107,8 +110,6 @@ func (account *Account) GetManifest() (*DeviceManifest, error) {
 		return nil, fmt.Errorf("failed to get device manifest, status code: %d, response: %s", resp.StatusCode(), resp.String())
 	}
 
-	account.SyncModules = &manifest.SyncModules
-
 	return manifest, nil
 }
 
@@ -117,7 +118,7 @@ type localStorageManifestIDResponse struct {
 	NetworkID int `json:"network_id"`
 }
 
-func (account *Account) GetLocalStorageManifestRequestID(networkID, syncModuleID int) (int, error) {
+func (account *Account) getLocalStorageManifestRequestID(networkID, syncModuleID int) (int, error) {
 	localManifestIDResponse := &localStorageManifestIDResponse{}
 	c := client.New(account.AuthToken)
 	url := fmt.Sprintf("https://rest-%s.immedia-semi.com/api/v1/accounts/%d/networks/%d/sync_modules/%d/local_storage/manifest/request", account.Tier, account.ID, networkID, syncModuleID)
@@ -143,7 +144,15 @@ type LocalStorageManifest struct {
 	Clips      []Clip `json:"clips"`
 }
 
-func (account *Account) GetLocalStorageManifest(networkID, syncModuleID, manifestRequestID int) (*LocalStorageManifest, error) {
+// Returns the local storage manifest, can take a little while depending on network availability
+// Returns Object contaiting version, manifestID, and list of clips for sync module
+func (account *Account) GetLocalStorageManifest(networkID, syncModuleID int) (*LocalStorageManifest, error) {
+	manifestRequestID, err := account.getLocalStorageManifestRequestID(networkID, syncModuleID)
+
+	if err != nil {
+		return nil, err
+	}
+
 	c := client.New(account.AuthToken)
 	url := fmt.Sprintf("https://rest-%s.immedia-semi.com/api/v1/accounts/%d/networks/%d/sync_modules/%d/local_storage/manifest/request/%d", account.Tier, account.ID, networkID, syncModuleID, manifestRequestID)
 	localManifest := &LocalStorageManifest{}
@@ -154,7 +163,21 @@ func (account *Account) GetLocalStorageManifest(networkID, syncModuleID, manifes
 
 	if err != nil {
 		return nil, err
-	} else if !resp.IsSuccess() {
+	}
+
+	for resp.StatusCode() == 409 {
+		resp, err = c.R().
+			SetResult(localManifest).
+			Get(url)
+
+		if err != nil {
+			return nil, err
+		}
+
+		time.Sleep(time.Second * 1)
+	}
+
+	if !resp.IsSuccess() {
 		return nil, fmt.Errorf("failed to get local storage manifest, status code: %d, response: %s", resp.StatusCode(), resp.String())
 	}
 

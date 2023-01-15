@@ -1,12 +1,12 @@
 package blink
 
-func (account *Account) GetSyncModules() error {
+// Returns sync modules from manifest
+func (account *Account) GetSyncModules() (*[]SyncModule, error) {
 	manifest, err := account.GetManifest()
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	account.SyncModules = &manifest.SyncModules
-	return nil
+	return &manifest.SyncModules, nil
 }

@@ -9,20 +9,10 @@ const (
 	LoginURL = BaseURL + "/api/v5/account/login"
 )
 
-type DefaultClient struct {
-	Client *resty.Client
-}
-
 func Default() *resty.Client {
-	c := resty.New().
-		SetHeader("Content-Type", "application/json")
-
-	return c
+	return resty.New().SetHeader("Content-Type", "application/json")
 }
 
 func New(token string) *resty.Client {
-	c := Default().
-		SetHeader("token-auth", token)
-
-	return c
+	return Default().SetHeader("token-auth", token)
 }
