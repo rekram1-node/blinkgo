@@ -73,8 +73,8 @@ func main() {
 
 	// if blink wants a 2FA verification you must use the 
 	// verify pin operation
-	// 2FA is not always required but typically required first
-	// time on new device
+	// 2FA is not always required but it is typically
+	// required first time on new device
 	if loginResp.Account.AccountVerificationRequired {
 		fmt.Print("Enter Pin: ")
 		var pin string
