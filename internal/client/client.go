@@ -10,15 +10,9 @@ const (
 )
 
 func Default() *resty.Client {
-	c := resty.New().
-		SetHeader("Content-Type", "application/json")
-
-	return c
+	return resty.New().SetHeader("Content-Type", "application/json")
 }
 
 func New(token string) *resty.Client {
-	c := Default().
-		SetHeader("token-auth", token)
-
-	return c
+	return Default().SetHeader("token-auth", token)
 }

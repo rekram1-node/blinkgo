@@ -126,8 +126,7 @@ func (account *Account) VerifyPin(pin string) (*VerifyResponse, error) {
 func (account *Account) Logout() error {
 	c := client.New(account.AuthToken)
 	url := fmt.Sprintf("https://rest-%s.immedia-semi.com/api/v4/account/%d/client/%d/logout", account.Tier, account.ID, account.ClientID)
-	resp, err := c.R().
-		Post(url)
+	resp, err := c.R().Post(url)
 
 	if err != nil {
 		return err
